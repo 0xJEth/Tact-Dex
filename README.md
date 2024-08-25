@@ -21,3 +21,6 @@
 
 `npx blueprint run` or `yarn blueprint run`
 
+### Add a new contract
+
+`npx blueprint create ContractName` or `yarn blueprint create ContractName`
