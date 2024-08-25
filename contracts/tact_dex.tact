@@ -97,8 +97,8 @@ contract TactDex with Deployable {
             return;
         }
         // if the amount of jetton A to send is less than the amount of jetton A in the pool then we send the jetton A and update the  
-        self.bAmount = self.bAmount + msg.amount;
-        self.aAmount = self.aAmount - aAmountToSend;
+        /*self.bAmount = self.bAmount + msg.amount;
+        self.aAmount = self.aAmount - aAmountToSend;*/
         send(SendParameters{
             to: self.jettonAddressA,
             value: 0,
