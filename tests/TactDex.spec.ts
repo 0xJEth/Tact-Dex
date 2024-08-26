@@ -46,4 +46,13 @@ describe('TactDex', () => {
         // the check is done inside beforeEach
         // blockchain and tactDex are ready to use
     });
+
+    it('should deploy with the correct initial state', async() => {
+        const balanceA = await tactDex.getBalance(jettonAddressA);
+        const balanceB = await tactDex.getBalance(jettonAddressB);
+
+        expect(balanceA).toEqual(0n);
+        expect(balanceB).toEqual(0n);
+
+    });
 });
