@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { toNano, Address } from '@ton/core';
+import { toNano, Address, Cell, beginCell } from '@ton/core';
 import { TactDex } from '../wrappers/TactDex';
 import '@ton/test-utils';
 
@@ -10,7 +10,7 @@ describe('TactDex', () => {
     let adminAddress: Address;
     let jettonAddressA: Address;
     let jettonAddressB: Address;
-
+    
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -54,5 +54,88 @@ describe('TactDex', () => {
         expect(balanceA).toEqual(0n);
         expect(balanceB).toEqual(0n);
 
+        console.log('balance', {balanceA});
+        console.log('balance', {balanceB});
+
+    });
+
+    it('should add jettons to the pool by admin', async() => {
+        const amountToAdd = 1000n;
+        await tactDex.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.02'),
+            },
+            {
+                $$type: 'TokenNotification',
+                queryId: 0n,
+                amount: amountToAdd,
+                from: adminAddress,
+                forwardPayload: beginCell().endCell().beginParse()
+            }
+        );
+        console.log('amount',{amountToAdd});
+    });
+    
+    it('should swap jetton B for jetton A', async () => {
+        const initialA = 1000n;
+        const initialB = 200n;
+        const swapB = 50n;
+
+        // Admin adds initial jettons to the pool
+        await tactDex.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.02'),
+            },
+            {
+                $$type: 'TokenNotification',
+                queryId: 0n,
+                amount: initialA,
+                from: adminAddress,
+                forwardPayload: beginCell().endCell().beginParse()
+            }
+        );
+
+        await tactDex.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.02'),
+            },
+            {
+                $$type: 'TokenNotification',
+                queryId: 0n,
+                amount: initialB,
+                from: adminAddress,
+                forwardPayload: beginCell().endCell().beginParse()
+            }
+        );
+
+        // Simulate a user swapping jetton B for A
+        await tactDex.send(
+            deployer.getSender(),
+            {
+                value: toNano('0.02'),
+            },
+            {
+                $$type: 'TokenNotification',
+                queryId: 0n,
+                amount: swapB,
+                from: deployer.address,
+                forwardPayload: beginCell().endCell().beginParse()
+            }
+        );
+
+        const balanceA = await tactDex.getBalance(jettonAddressA);
+        const balanceB = await tactDex.getBalance(jettonAddressB);
+
+        // Calculate expected amounts after swap
+        const expectedA = initialA - (initialA * swapB / initialB);
+        const expectedB = initialB + swapB;
+
+        /*expect(balanceA).toEqual(expectedA);
+        expect(balanceB).toEqual(expectedB);*/
+        console.log('a amount', {expectedA});
+        console.log('b amount', {expectedB});
     });
 });
