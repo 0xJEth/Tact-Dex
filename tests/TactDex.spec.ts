@@ -76,8 +76,8 @@ describe('TactDex', () => {
     
     it('should swap jetton B for jetton A', async () => {
         const initialA = 1000n;
-        const initialB = 200n;
-        const swapB = 100n;
+        const initialB = 500n;
+        const swapB = 50n;
 
         // Admin adds initial jettons to the pool
         await tactDex.send(
@@ -134,6 +134,10 @@ describe('TactDex', () => {
         expect(balanceB).toEqual(expectedB);*/
         console.log('a amount', {expectedA});
         console.log('b amount', {expectedB});
+    });
+
+    it('should reject swap if there is insufficient Jetton A', async() => {
+        
     });
 
     
