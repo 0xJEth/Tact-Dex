@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { toNano, Address, Cell, beginCell } from '@ton/core';
+import { toNano, Address, Cell, beginCell, loadDepthBalanceInfo } from '@ton/core';
 import { TactDex } from '../wrappers/TactDex';
 import '@ton/test-utils';
 
@@ -10,7 +10,6 @@ describe('TactDex', () => {
     let adminAddress: Address;
     let jettonAddressA: Address;
     let jettonAddressB: Address;
-    
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -50,14 +49,17 @@ describe('TactDex', () => {
     it('should deploy with the correct initial state', async() => {
         const balanceA = await tactDex.getBalance(jettonAddressA);
         const balanceB = await tactDex.getBalance(jettonAddressB);
-
+        console.log('balanceA0', {balanceA});
+        console.log('balanceB0', {balanceB});
         expect(balanceA).toEqual(0n);
         expect(balanceB).toEqual(0n);
-
     });
 
     it('should add jettons to the pool by admin', async() => {
         const amountToAdd = 1000n;
+        
+        const initialBalanceA = await tactDex.getBalance(jettonAddressA);
+        console.log('Initial balanceA', initialBalanceA);
         await tactDex.send(
             deployer.getSender(),
             {
@@ -71,7 +73,9 @@ describe('TactDex', () => {
                 forwardPayload: beginCell().endCell().beginParse()
             }
         );
-        console.log('amount',{amountToAdd});
+        const balanceA = await tactDex.getBalance(jettonAddressA);
+        console.log('Updated balanceA', balanceA);
+        expect(balanceA).toEqual(amountToAdd);
     });
     
     it('should swap jetton B for jetton A', async () => {
@@ -106,8 +110,8 @@ describe('TactDex', () => {
                 from: adminAddress,
                 forwardPayload: beginCell().endCell().beginParse()
             }
+            
         );
-
         // Simulate a user swapping jetton B for A
         await tactDex.send(
             deployer.getSender(),
@@ -126,19 +130,17 @@ describe('TactDex', () => {
         const balanceA = await tactDex.getBalance(jettonAddressA);
         const balanceB = await tactDex.getBalance(jettonAddressB);
 
+        console.log('Balance A after swap:', balanceA);
+        console.log('Balance B after swap:', balanceB);
         // Calculate expected amounts after swap
         const expectedA = initialA - (initialA * swapB / initialB);
         const expectedB = initialB + swapB;
-
-        /*expect(balanceA).toEqual(expectedA);
-        expect(balanceB).toEqual(expectedB);*/
-        console.log('a amount', {expectedA});
-        console.log('b amount', {expectedB});
-    });
-
-    it('should reject swap if there is insufficient Jetton A', async() => {
         
-    });
+        console.log('Expected A:', expectedA);
+        console.log('Expected B:', expectedB);
 
+        expect(balanceA).toEqual(expectedA);
+        expect(balanceB).toEqual(expectedB);
+    });
     
 });

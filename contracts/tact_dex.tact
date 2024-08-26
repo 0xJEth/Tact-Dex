@@ -144,6 +144,7 @@ contract TactDex with Deployable {
     //if the amount of jetton B to send is less than the amount of jetton B in the pool, then we send the jetton B and update the 
     self.aAmount = self.aAmount + msg.amount;
     self.bAmount = self.bAmount - bAmountToSend;
+
     send(SendParameters{
         to: self.jettonAddressB,
         value: 0,
@@ -160,6 +161,7 @@ contract TactDex with Deployable {
     });
     return;
   }
+
   //receive a different jetton ( neither A nor B), throw an error 
     throw(0xf);
 }
@@ -181,5 +183,6 @@ contract TactDex with Deployable {
     // if the jetton is B, then we return the price of B
     return self.aAmount * decimal /self.bAmount;
   }
+    // Debugging output to track internal state before swap
 
 }
